@@ -1,5 +1,7 @@
 package gn.traore.demo.web.controllers;
 
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.queryParam;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -8,17 +10,21 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -58,18 +64,20 @@ public class ControlerDiplome {
 	
 	@PostMapping(value="/secureListeDiplomes")
 	public boolean securiserListeDiplome(@RequestBody InfosDiplome infos) {
-		/*List<DiplomeNonSecure> listDiplomes = new ArrayList<>();
+		DiplomeNonSecure[] listDiplomes = null;
 		try {
 			// On récupère l'instance InfosDiplome
 			infosDiplome = infos;
 			
 			// On fait appel à l'API pour réccupérer les diplomes à sécuriser
-			listDiplomes = recupData();
+			listDiplomes = recupData(infos);
 			
 			// On sécurise les diplomes recupérés
 			for (DiplomeNonSecure diplome : listDiplomes) {
 				securiserDiplome(diplome);
-			}			
+			}
+			
+			return true;
 			
 		} catch (WriterException e) {
 			e.printStackTrace();
@@ -77,23 +85,48 @@ public class ControlerDiplome {
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
-		}*/
-		return true;
+		}
+		
 	}
 	
 	//	Methode permettant de recupérer les diplomes non 
 	// 	securisé au niveau des etablissements.
-	@GetMapping(value="/recupDATA")
-	private DiplomeNonSecure recupData() {
+	@PostMapping(value="/recupDATA")
+	private DiplomeNonSecure[] recupData(@RequestBody InfosDiplome infos) {
+		String url = "http://localhost/apiRecupDATA/recupDATA.php";
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<DiplomeNonSecure> reponse = 
+		
+		HttpHeaders requestHeaders = new HttpHeaders();		
+        requestHeaders.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+		//requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        //requestHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        
+        HttpEntity<InfosDiplome> requestEntity = new HttpEntity<>(infos, requestHeaders);    
+        
+      //adding the query params to the URL
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
+                .queryParam("filiere", infos.getFiliere())
+                .queryParam("niveau", infos.getNiveau())
+        		.queryParam("promotion", infos.getPromotion());
+        
+		ResponseEntity<DiplomeNonSecure[]> reponse = 
 				restTemplate.exchange(
-						"http://localhost/apiRecupDATA/recupDATA.php",
+						uriBuilder.toUriString(),
 						HttpMethod.GET, 
-						null,
-						DiplomeNonSecure.class
+						requestEntity,
+						DiplomeNonSecure[].class
 					);
-		return reponse.getBody();
+		if (reponse.getStatusCode() == HttpStatus.OK) {
+            System.out.println("response received");
+            System.out.println(reponse.getBody().toString() + " ==> " + reponse.getHeaders().getContentType());
+            
+            return reponse.getBody();
+        } else {
+            System.out.println("error occurred");
+            System.out.println(reponse.getStatusCode());
+            return null;
+        }
+		
 	}
 	
 	/*@GetMapping(value="/Alldiplomes")
@@ -112,9 +145,9 @@ public class ControlerDiplome {
 		DiplomeSecure ds = new DiplomeSecure(
 				infosDiplome.getFiliere(), 
 				infosDiplome.getPromotion(), 
-				dns.getNomEtudiant(), 
-				dns.getPrenomEtudiant(), 
-				dns.getPhotoEtudiant(), 
+				dns.getNom(), 
+				dns.getPrenom(), 
+				dns.getPhoto(), 
 				niveau
 			);	
 		
@@ -122,7 +155,7 @@ public class ControlerDiplome {
         ds.setEmpreinte(empreinte);
 		
 		//On forme le nom du qrCode
-		String nomQRCode = dns.getNomEtudiant() + "-" + dns.getMatriculeEtudiant();
+		String nomQRCode = dns.getNom() + "-" + dns.getMatricule();
 		
 		//On génère le qrCode
 		String qrCode = genererQRCode(empreinte, nomQRCode);
@@ -140,9 +173,9 @@ public class ControlerDiplome {
 	private String genereEmpreinte(DiplomeNonSecure d) {
 		// Préparation des informations, pour la 
 		// génération de l'empreinte.
-		String infos = d.getNomEtudiant()
-				+ d.getPrenomEtudiant()
-				+ d.getMatriculeEtudiant();
+		String infos = d.getNom()
+				+ d.getPrenom()
+				+ d.getMatricule();
 		
 		// Préparation de l'empreinte
         MessageDigest empreinte = null;

@@ -8,57 +8,76 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class DiplomeNonSecure implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private String matriculeEtudiant;
-	private String nomEtudiant;
-	private String prenomEtudiant;
-	private String photoEtudiant;
+	private int id;
+	private String matricule;
+	private String nom;
+	private String prenom;
+	private String photo;
 	/**
-	 * @return the matriculeEtudiant
+	 * @return the id
 	 */
-	public String getMatriculeEtudiant() {
-		return matriculeEtudiant;
+	public int getId() {
+		return id;
 	}
 	/**
-	 * @param matriculeEtudiant the matriculeEtudiant to set
+	 * @param id the id to set
 	 */
-	public void setMatriculeEtudiant(String matriculeEtudiant) {
-		this.matriculeEtudiant = matriculeEtudiant;
+	public void setId(int id) {
+		this.id = id;
 	}
 	/**
-	 * @return the nomEtudiant
+	 * @return the matricule
 	 */
-	public String getNomEtudiant() {
-		return nomEtudiant;
+	public String getMatricule() {
+		return matricule;
 	}
 	/**
-	 * @param nomEtudiant the nomEtudiant to set
+	 * @param matricule the matricule to set
 	 */
-	public void setNomEtudiant(String nomEtudiant) {
-		this.nomEtudiant = nomEtudiant;
+	public void setMatricule(String matricule) {
+		this.matricule = matricule;
 	}
 	/**
-	 * @return the prenomEtudiant
+	 * @return the nom
 	 */
-	public String getPrenomEtudiant() {
-		return prenomEtudiant;
+	public String getNom() {
+		return nom;
 	}
 	/**
-	 * @param prenomEtudiant the prenomEtudiant to set
+	 * @param nom the nom to set
 	 */
-	public void setPrenomEtudiant(String prenomEtudiant) {
-		this.prenomEtudiant = prenomEtudiant;
+	public void setNom(String nom) {
+		this.nom = nom;
 	}
 	/**
-	 * @return the photoEtudiant
+	 * @return the prenom
 	 */
-	public String getPhotoEtudiant() {
-		return photoEtudiant;
+	public String getPrenom() {
+		return prenom;
 	}
 	/**
-	 * @param photoEtudiant the photoEtudiant to set
+	 * @param prenom the prenom to set
 	 */
-	public void setPhotoEtudiant(String photoEtudiant) {
-		this.photoEtudiant = photoEtudiant;
+	public void setPrenom(String prenom) {
+		this.prenom = prenom;
 	}
-
+	/**
+	 * @return the photo
+	 */
+	public String getPhoto() {
+		return photo;
+	}
+	/**
+	 * @param photo the photo to set
+	 */
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+	/**
+	 * @return the serialversionuid
+	 */
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+	
 }
